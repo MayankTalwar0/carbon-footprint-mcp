@@ -1,0 +1,42 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Distribution / Packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+mcp-publisher.exe
+mcp-publisher.tar.gz
+
+# Output files
+carbon_footprint_report.html
+carbon_footprint_report.md
+emissions_data.json
+
+# Temp files
+_extract.py
+_extract_output.txt
+_build_factors.py
+_verify.py
+
+# IDEs
+.vscode/
+.idea/
+.gemini/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Local
+local/

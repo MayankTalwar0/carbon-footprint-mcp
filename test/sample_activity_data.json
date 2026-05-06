@@ -1,0 +1,30 @@
+{
+  "source": "manual_example",
+  "period": "Q1 2026",
+  "egrid_subregion": "CAMX",
+  "annual_revenue": 5000000,
+  "headcount": 25,
+  "electricity_kwh": 45000,
+  "stationary_combustion": [
+    {"fuel_type": "Natural Gas", "quantity": 1200, "quantity_unit": "scf"}
+  ],
+  "mobile_combustion": [
+    {"fuel_type": "Motor Gasoline", "gallons": 800},
+    {"fuel_type": "Diesel Fuel", "gallons": 200}
+  ],
+  "business_travel": [
+    {"mode": "Air Travel - Medium Haul", "distance": 25000},
+    {"mode": "Passenger Car", "distance": 5000}
+  ],
+  "employee_commuting": [
+    {"mode": "Passenger Car", "distance": 75000},
+    {"mode": "Bus", "distance": 20000}
+  ],
+  "transportation": [
+    {"vehicle_type": "Medium- and Heavy-Duty Truck", "distance": 3000, "unit": "vehicle-mile"}
+  ],
+  "waste": [
+    {"material": "Mixed MSW", "short_tons": 3.0, "disposal_method": "landfilled"},
+    {"material": "Mixed Paper (general)", "short_tons": 0.8, "disposal_method": "recycled"}
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "skill_name": "carbon-footprint-calculator",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I have a small office in Texas with 10 employees. We use about 30,000 kWh of electricity per quarter, 500 gallons of gasoline for company vehicles, and produce about 2 short tons of mixed office waste sent to landfill. Annual revenue is $2M. Calculate our carbon footprint.",
+      "expected_output": "Scope 2 electricity computed using ERCT subregion factors. Scope 1 mobile combustion from 500 gallons gasoline. Scope 3 waste from 2 short tons MSW landfilled. Carbon intensity scores computed. No stationary combustion since natural gas wasn't mentioned.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "I uploaded my bank CSV. We're a remote-first SaaS company, no office. Can you estimate our carbon footprint?",
+      "expected_output": "Agent categorizes transactions into emission sources (utility bills, travel, shipping). Agent asks about eGRID subregion or uses US Average. Agent notes that remote companies typically have minimal Scope 1/2 and primarily Scope 3. Agent does NOT fabricate electricity usage if no utility bills are found.",
+      "files": ["bank_statement.csv"]
+    },
+    {
+      "id": 3,
+      "prompt": "Calculate emissions for: 100,000 kWh electricity in California, 2000 gallons diesel for fleet, 50,000 passenger-miles of medium-haul air travel, 5 short tons mixed MSW landfilled. Revenue $10M, 50 employees.",
+      "expected_output": "All scopes computed. CAMX subregion used for electricity. Diesel at 10.21 kg CO2/gallon. Air travel using medium-haul factor. Waste using MSW landfill factor. Both intensity scores provided. Both HTML and MD reports generated.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "What emission factors do you have for electricity by region?",
+      "expected_output": "Agent calls listEmissionFactors with category='egrid' and returns all 28 eGRID subregions with names. Does not attempt to compute emissions without activity data.",
+      "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "I only have my electricity bill showing $4,500 for the quarter in New York City. Can you estimate emissions?",
+      "expected_output": "Agent estimates kWh from bill amount (stating assumption of ~$0.20/kWh for NYC). Uses NYCW subregion. Computes Scope 2 only. Clearly flags the dollar-to-kWh conversion as an estimate. All other scopes return insufficient_data.",
+      "files": []
+    }
+  ]
+}

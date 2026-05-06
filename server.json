@@ -1,0 +1,23 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.MayankTalwar0/carbon-footprint-calculator",
+  "version": "1.0.0",
+  "description": "An MCP server for calculating carbon footprints from bank statements using EPA GHG emission factors.",
+  "repository": {
+    "url": "https://github.com/MayankTalwar0/carbon-footprint-calculator",
+    "source": "github"
+  },
+  "packages": [
+    {
+      "registryType": "pypi",
+      "identifier": "carbon-footprint-mcp",
+      "version": "1.0.0",
+      "runtimeHint": "uvx",
+      "runtimeArguments": [],
+      "packageArguments": [],
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}
