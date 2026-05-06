@@ -411,19 +411,19 @@ def compute_score(total_co2e_kg, inputs):
         mt_per_million = (total_co2e_kg / 1000) / (revenue / 1_000_000)
         if mt_per_million < 5:
             label = "excellent"
-            reason = "< 5 tCO2e per $1M revenue — best-in-class"
+            reason = "< 5 tCO2e per $1M revenue - best-in-class"
         elif mt_per_million < 20:
             label = "good"
-            reason = "5–20 tCO2e per $1M revenue — low intensity"
+            reason = "5-20 tCO2e per $1M revenue - low intensity"
         elif mt_per_million < 100:
             label = "moderate"
-            reason = "20–100 tCO2e per $1M revenue — typical for services/tech"
+            reason = "20-100 tCO2e per $1M revenue - typical for services/tech"
         elif mt_per_million < 500:
             label = "high"
-            reason = "100–500 tCO2e per $1M revenue — high intensity"
+            reason = "100-500 tCO2e per $1M revenue - high intensity"
         else:
             label = "very_high"
-            reason = "> 500 tCO2e per $1M revenue — very high intensity"
+            reason = "> 500 tCO2e per $1M revenue - very high intensity"
         scores["carbon_intensity_revenue"] = {
             "value": _safe_round(mt_per_million, 2),
             "unit": "metric tons CO2e per $1M revenue",
@@ -436,19 +436,19 @@ def compute_score(total_co2e_kg, inputs):
         per_employee = (total_co2e_kg / 1000) / headcount
         if per_employee < 2:
             label = "excellent"
-            reason = "< 2 tCO2e per employee — remote/digital business"
+            reason = "< 2 tCO2e per employee - remote/digital business"
         elif per_employee < 5:
             label = "good"
-            reason = "2–5 tCO2e per employee — low footprint"
+            reason = "2-5 tCO2e per employee - low footprint"
         elif per_employee < 15:
             label = "moderate"
-            reason = "5–15 tCO2e per employee — typical office-based"
+            reason = "5-15 tCO2e per employee - typical office-based"
         elif per_employee < 50:
             label = "high"
-            reason = "15–50 tCO2e per employee — heavy operations"
+            reason = "15-50 tCO2e per employee - heavy operations"
         else:
             label = "very_high"
-            reason = "> 50 tCO2e per employee — very high"
+            reason = "> 50 tCO2e per employee - very high"
         scores["carbon_intensity_headcount"] = {
             "value": _safe_round(per_employee, 2),
             "unit": "metric tons CO2e per employee",
