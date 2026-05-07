@@ -17,6 +17,8 @@ If you are preparing ESG reporting, investor diligence materials, or internal su
 
 This server helps turn raw bank statements, Xero or QBO exports, and structured operational inputs into a carbon footprint report in minutes. It maps activities to EPA-aligned emission factors and produces both HTML and Markdown outputs.
 
+The user experience is designed to work for organizations in any country, while the current electricity benchmarking still uses EPA eGRID regional factors under the hood.
+
 ## What It Does
 
 1. Ingests bank CSVs, Xero or QBO exports, and structured activity data.

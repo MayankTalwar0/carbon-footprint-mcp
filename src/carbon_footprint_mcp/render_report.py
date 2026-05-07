@@ -46,7 +46,8 @@ def render_markdown(payload):
     lines.append(f"- **Generated:** {datetime.now(UTC).strftime('%Y-%m-%d %H:%M UTC')}")
     lines.append(f"- **Source:** {payload.get('source', 'manual')}")
     lines.append(f"- **Period:** {payload.get('period', 'Not specified')}")
-    lines.append(f"- **eGRID Subregion:** {payload.get('egrid_subregion', 'US Average')}")
+    lines.append(f"- **Electricity Benchmark Region:** {payload.get('egrid_subregion', 'US Average')}")
+    lines.append("- **Electricity Benchmark Source:** EPA eGRID regional factors")
     lines.append("")
 
     totals = payload.get("totals", {})
@@ -185,7 +186,7 @@ def render_html(payload):
     <div class="panel">
       <div class="head">
         <h1>Carbon Footprint Report</h1>
-        <div class="meta">Generated: {escape(generated)} | Source: {escape(str(payload.get('source', 'manual')))} | Period: {escape(str(payload.get('period', '')))} | eGRID: {escape(str(payload.get('egrid_subregion', 'US Average')))}</div>
+        <div class="meta">Generated: {escape(generated)} | Source: {escape(str(payload.get('source', 'manual')))} | Period: {escape(str(payload.get('period', '')))} | Electricity benchmark: {escape(str(payload.get('egrid_subregion', 'US Average')))} (EPA eGRID)</div>
       </div>
       <div class="hero">
         <div class="hero-value">{total_mt:,.2f}</div>

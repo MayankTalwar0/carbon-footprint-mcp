@@ -21,11 +21,13 @@ mcp = FastMCP(
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 REFERENCES_DIR = PROJECT_ROOT / "references"
 
+
 @mcp.resource("file://references/calculation_guide.md")
 def get_calculation_guide() -> str:
     """Provides EPA GHG emission calculation methodology and factor references."""
     path = REFERENCES_DIR / "calculation_guide.md"
     return path.read_text(encoding="utf-8") if path.exists() else "Calculation guide not found."
+
 
 @mcp.resource("file://references/validation_rules.md")
 def get_validation_rules() -> str:
@@ -33,11 +35,13 @@ def get_validation_rules() -> str:
     path = REFERENCES_DIR / "validation_rules.md"
     return path.read_text(encoding="utf-8") if path.exists() else "Validation rules not found."
 
+
 @mcp.resource("file://references/worked_example.md")
 def get_worked_example() -> str:
     """Provides a worked example of carbon footprint computation."""
     path = REFERENCES_DIR / "worked_example.md"
     return path.read_text(encoding="utf-8") if path.exists() else "Worked example not found."
+
 
 @mcp.prompt()
 def analyzeEmissions() -> str:
@@ -53,13 +57,13 @@ Start by asking the user to provide the following. Be friendly and concise:
 **Required:**
 - Bank statement CSV, Xero P&L export, or QBO export
 
-**Optional — but you MUST ask before proceeding, never assume:**
-- Geographic location / state (determines electricity emission factors)
+**Optional - but you MUST ask before proceeding, never assume:**
+- Geographic location (city, region/state, and country if available; used to choose the closest electricity benchmark)
 - Number of employees (headcount)
 - Annual revenue
 
 Do NOT proceed to Step 2 until you have either received these values from the user
-or the user has explicitly said to skip them. If skipped, pass null — never invent them.
+or the user has explicitly said to skip them. If skipped, pass null - never invent them.
 
 ## Step 1b: Scoring Inputs Gate (MANDATORY)
 
@@ -68,34 +72,34 @@ or the user has explicitly said to skip them. If skipped, pass null — never in
 > "To calculate your carbon intensity score (emissions per employee and per $1M revenue),
 > I need two more pieces of information:
 > - **Number of employees** (headcount)
-> - **Annual revenue** (in USD)
+> - **Annual revenue** (include currency if helpful)
 >
-> These are optional — if you'd prefer to skip scoring, just say so and I'll proceed
+> These are optional - if you'd prefer to skip scoring, just say so and I'll proceed
 > without it. Otherwise, please share the numbers."
 
 **Rules:**
-- If the user provides both → use them exactly as given.
-- If the user says skip → pass `null` for both. Do NOT compute scores.
-- If the user provides one → use it, pass `null` for the other.
+- If the user provides both -> use them exactly as given.
+- If the user says skip -> pass `null` for both. Do NOT compute scores.
+- If the user provides one -> use it, pass `null` for the other.
 - **NEVER invent, estimate, or assume these numbers.** Do not use round numbers like
-  $1,000,000 or 10 employees as defaults. There are no defaults. Only real user-provided
-  values are valid.
+  1,000,000 revenue or 10 employees as defaults. There are no defaults. Only real
+  user-provided values are valid.
 
 ## Step 2: Categorize Transactions into Emission Categories
 
 When you receive bank/financial data, categorize EACH transaction into these emission
 categories using your judgment:
 
-### Scope 1 — Direct Emissions (owned/controlled sources)
+### Scope 1 - Direct Emissions (owned/controlled sources)
 - **Stationary Combustion:** Natural gas bills, heating oil, propane purchases, boiler fuel
 - **Mobile Combustion:** Fleet fuel (gasoline, diesel), company vehicle fuel cards
 - **Refrigerants:** HVAC maintenance/recharge, refrigerant purchases
 
-### Scope 2 — Purchased Energy
+### Scope 2 - Purchased Energy
 - **Electricity:** Electric utility bills, electricity payments
 - **Steam/Heat:** District heating, purchased steam
 
-### Scope 3 — Value Chain
+### Scope 3 - Value Chain
 - **Business Travel:** Airlines, hotels with flights, rental cars, rail tickets, ride-shares for business
 - **Employee Commuting:** Transit subsidies, parking benefits, commuter reimbursements
 - **Transportation & Distribution:** Shipping/freight charges (FedEx, UPS, freight forwarders)
@@ -109,21 +113,20 @@ categories using your judgment:
 ### CRITICAL RULES:
 1. **NEVER assume a percentage.** Do NOT estimate any value as a fraction of another.
 2. **NEVER hardcode or invent numbers.** If no transactions belong to a category, pass null.
-3. **Categorization IS allowed.** You MAY assign "PG&E Electric" to electricity or "Shell Gas
-   Station" to mobile combustion based on description.
+3. **Categorization IS allowed.** You MAY assign clearly named utility, fuel, travel, shipping,
+   or waste transactions to the matching emissions category based on description.
 4. **When uncertain**, pass null. It is better to return insufficient_data than to fabricate.
 5. **NEVER invent annual_revenue or headcount.** These MUST come from the user verbally.
-   If the user did not state them, pass null — even if you think you can infer them from
+   If the user did not state them, pass null - even if you think you can infer them from
    the bank data. Inventing these values produces a false carbon intensity score, which is
    more harmful than showing no score at all.
 
-## Step 2b: Determine eGRID Subregion
+## Step 2b: Determine Electricity Benchmark Region
 
-For Scope 2 electricity calculations, identify the eGRID subregion:
-1. If the user provided their location/state in Step 1, map it to the correct eGRID subregion.
-2. If not provided, use "US Average" as the default and note this in the report.
-3. Common mappings: California→CAMX, Texas→ERCT, New York City→NYCW, Florida→FRCC,
-   Pacific Northwest→NWPP, New England→NEWE, Mid-Atlantic→RFCE, Midwest→MROW
+For Scope 2 electricity calculations, identify the closest available eGRID subregion benchmark:
+1. If the user provided their city, region/state, or country in Step 1, use that context to map to the closest available eGRID subregion.
+2. If the location is missing or cannot be mapped confidently, use "US Average" as the default benchmark and note in the report that the electricity estimate uses the current EPA/eGRID fallback.
+3. Do not overwhelm the user with US-only examples unless their location makes them relevant.
 
 ## Step 3: Structure the Data and Compute Emissions
 
@@ -155,20 +158,14 @@ provided those values in this conversation. Do not fill them with guesses.**
 Replace null with real values only when you have them. Leave null for everything else.
 
 ### Key conversion guidance for the AI:
-- **Electricity:** If you see dollar amounts for utility bills, ask the user for kWh or estimate
-  from the bill amount using average rates (~$0.12–0.15/kWh US average). State the assumption.
-- **Natural Gas:** If you see dollar amounts, ask for therms/ccf/mcf or estimate.
-  1 therm = 100,000 BTU = 0.1 mmBtu. State the assumption.
-- **Fuel:** If you see gas station charges, estimate gallons from the dollar amount using
-  average fuel prices (~$3.50/gallon). State the assumption clearly.
-- **Travel:** If you see airline charges, estimate passenger-miles from ticket cost and
-  route if identifiable.
-- **Period:** It is critical to accurately set `period_months` based on the CSV data
-  (e.g., 3 for a quarter, 12 for a year) so that emissions can be annualized correctly
-  against annual revenue. If you can't tell, ask the user.
+- **Electricity:** If you see spend for utility bills, first ask the user for kWh. If they do not have it, you may estimate consumption from the bill amount using a clearly stated local rate assumption that matches the user's geography and currency. Flag it as an estimate.
+- **Natural Gas:** If you see spend only, ask for consumption units such as therms/ccf/mcf or estimate only when the user wants an estimate. State the assumption clearly. 1 therm = 100,000 BTU = 0.1 mmBtu.
+- **Fuel:** If you see fuel purchases, you may estimate gallons or liters from the spend only when necessary and only with a clearly stated local price assumption.
+- **Travel:** If you see airline charges, estimate passenger-miles from ticket cost and route if identifiable.
+- **Period:** It is critical to accurately set `period_months` based on the CSV data (e.g., 3 for a quarter, 12 for a year) so that emissions can be annualized correctly against annual revenue. If you can't tell, ask the user.
 - **Always state your assumptions** so the user can correct them.
 
-## Step 4: Generate the Report (MANDATORY — do not skip)
+## Step 4: Generate the Report (MANDATORY - do not skip)
 
 After calling `computeEmissions`, you MUST immediately call `generateEmissionsReport`.
 This is not optional. Do not present any results to the user before the report files are saved.
@@ -176,11 +173,11 @@ This is not optional. Do not present any results to the user before the report f
 **RULE: Never end your turn after `computeEmissions` without also calling `generateEmissionsReport`.**
 
 This saves BOTH:
-- `carbon_footprint_report.html` — styled visual report, open in any browser
-- `carbon_footprint_report.md` — plain-text fallback
+- `carbon_footprint_report.html` - styled visual report, open in any browser
+- `carbon_footprint_report.md` - plain-text fallback
 
-**Always pass an explicit `output_dir`** — either a path the user specified, or the user's
-Desktop. Do NOT use the default "." — when running under Claude Desktop the working
+**Always pass an explicit `output_dir`** - either a path the user specified, or the user's
+Desktop. Do NOT use the default "." - when running under Claude Desktop the working
 directory is not somewhere the user can find.
 
 ```json
@@ -206,8 +203,16 @@ After saving, tell the user the exact absolute paths to both files.
 5. List any categories that returned insufficient_data and what additional data would unlock them.
 6. Suggest 2-3 actionable reduction strategies based on their largest emission sources.
 
+## Tone and geography rules
+
+- Write as though the tool can be used by organizations in any country.
+- Do not ask only for a US state or give default US city examples unless the user is already discussing a US location.
+- Be transparent that the current electricity benchmark source is EPA/eGRID-based when that affects the result or fallback wording.
+- Keep internal field names and calculations unchanged; only the user-facing wording should be global and neutral.
+
 Always rely on the `computeEmissions` tool rather than doing math yourself. Never invent
 values for missing data.'''
+
 
 @mcp.tool()
 def computeEmissions(inputs_json: str) -> str:
@@ -244,13 +249,14 @@ def computeEmissions(inputs_json: str) -> str:
     )
     return json.dumps(result, indent=2)
 
+
 @mcp.tool()
 def generateEmissionsReport(emissions_json: str, output_dir: str = ".") -> str:
     """
     Generates a carbon footprint report in HTML + Markdown and saves to disk.
 
     Args:
-        emissions_json: JSON string — the direct output from computeEmissions.
+        emissions_json: JSON string - the direct output from computeEmissions.
         output_dir: Directory to save reports to. Default is current directory.
     Returns:
         JSON with paths to both report files and the markdown content inline.
@@ -281,6 +287,7 @@ def generateEmissionsReport(emissions_json: str, output_dir: str = ".") -> str:
         "markdown_content": md_content,
     })
 
+
 @mcp.tool()
 def listEmissionFactors(category: str = "all") -> str:
     """
@@ -300,6 +307,7 @@ def listEmissionFactors(category: str = "all") -> str:
     if cat in ("waste", "all"):
         result["waste_materials"] = list_waste_materials()
     return json.dumps(result, indent=2)
+
 
 if __name__ == "__main__":
     mcp.run()

@@ -20,7 +20,7 @@ Run these checks before emission computation. If a check fails, ask for clarific
 
 When the agent categorizes transactions to derive emission inputs:
 
-- **Allowed:** Assigning "PG&E Electric" to electricity, "Shell Gas Station" to mobile combustion, "FedEx Shipping" to transportation based on description.
+- **Allowed:** Assigning a clearly named utility bill to electricity, a fuel purchase to mobile combustion, or a shipping charge to transportation based on description.
 - **Forbidden:** Assuming "electricity = 30% of utilities" or any percentage-based estimate.
 - **Forbidden:** Hardcoding any numerical value that does not trace to a specific line item.
 - **Required:** If no transactions match a category, pass `null` for that input.
@@ -28,16 +28,16 @@ When the agent categorizes transactions to derive emission inputs:
 
 ## Unit Conversion Assumptions
 
-When converting dollar amounts to activity data (e.g., electricity bill → kWh):
+When converting spend amounts to activity data (for example, electricity bill -> kWh):
 
-- **Required:** State the assumption explicitly (e.g., "Assumed $0.13/kWh average rate").
+- **Required:** State the assumption explicitly (for example, "Assumed a local average electricity rate of 0.13 per kWh").
 - **Required:** Flag as an estimate in the output.
 - **Preferred:** Ask the user for actual consumption data instead.
 
 ## eGRID Subregion
 
-- If user provides state/location, map to correct eGRID subregion.
-- If not provided, default to "US Average" and note this in the report.
+- If the user provides city, region/state, or country, map to the closest available eGRID subregion.
+- If not provided, default to "US Average" and note in the report that this is the current EPA/eGRID fallback benchmark.
 - Do NOT silently assume a subregion without disclosing.
 
 ## Edge-Case Guardrails

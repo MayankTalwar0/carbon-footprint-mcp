@@ -2,9 +2,9 @@
 
 ## Scenario
 
-Small tech company, 25 employees, San Francisco (eGRID: CAMX)
+Small tech company, 25 employees, operating in a location mapped to the CAMX electricity benchmark region
 Analysis period: Q1 2026
-Annual revenue: $5,000,000
+Annual revenue: 5,000,000
 
 ## Inputs
 
@@ -48,7 +48,7 @@ Annual revenue: $5,000,000
 
 ## Expected Interpretation
 
-- Scope 2 (electricity) likely dominates for a tech company.
+- Scope 2 (electricity) likely dominates for a tech company in this benchmark region.
 - Scope 3 (travel, commuting) is the second largest contributor.
 - Scope 1 (gas, fleet fuel) is relatively small.
 - Carbon intensity score for a tech company at this revenue should be "good" or "moderate".

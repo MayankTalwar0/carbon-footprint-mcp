@@ -234,7 +234,7 @@ def build_reduction_opportunities(top_sources, payload):
         ),
         "Electricity": (
             "🔌 Reduce Electricity Emissions",
-            f"Your electricity is calculated using the {escape(egrid)} grid region. "
+            f"Your electricity estimate is benchmarked using the {escape(egrid)} EPA eGRID region. "
             "Consider purchasing Renewable Energy Certificates (RECs) or signing a green power agreement. "
             "LED lighting, smart thermostats, and Energy Star equipment reduce kWh consumption 15–30%."
         ),

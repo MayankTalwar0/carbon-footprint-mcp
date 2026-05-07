@@ -10,7 +10,7 @@
     {
       "id": 2,
       "prompt": "I uploaded my bank CSV. We're a remote-first SaaS company, no office. Can you estimate our carbon footprint?",
-      "expected_output": "Agent categorizes transactions into emission sources (utility bills, travel, shipping). Agent asks about eGRID subregion or uses US Average. Agent notes that remote companies typically have minimal Scope 1/2 and primarily Scope 3. Agent does NOT fabricate electricity usage if no utility bills are found.",
+      "expected_output": "Agent categorizes transactions into emission sources (utility bills, travel, shipping). Agent asks for city, region, or country to choose the closest electricity benchmark and falls back to US Average with an EPA/eGRID disclosure if needed. Agent notes that remote companies typically have minimal Scope 1/2 and primarily Scope 3. Agent does NOT fabricate electricity usage if no utility bills are found.",
       "files": ["bank_statement.csv"]
     },
     {
