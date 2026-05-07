@@ -398,17 +398,51 @@ def compute_scope3(inputs):
     return results
 
 
-def compute_score(total_co2e_kg, inputs):
+def _infer_period_months(inputs):
+    """
+    Determine how many months the analysis covers.
+    Checks explicit `period_months` field first, then parses `period` string.
+    Returns (months: float, label: str).
+    """
+    explicit = _to_number(inputs.get("period_months"))
+    if explicit is not None and 0 < explicit <= 12:
+        return explicit, f"{explicit}-month period"
+
+    period_str = str(inputs.get("period", "")).lower().strip()
+    # Quarter patterns: Q1, Q2, Q3, Q4, quarter
+    if any(q in period_str for q in ("q1", "q2", "q3", "q4", "quarter")):
+        return 3, "quarterly (3 months)"
+    # Half-year
+    if any(h in period_str for h in ("h1", "h2", "half", "semi")):
+        return 6, "half-year (6 months)"
+    # Monthly
+    months_list = ["january","february","march","april","may","june",
+                   "july","august","september","october","november","december"]
+    if any(m in period_str for m in months_list) or "month" in period_str:
+        return 1, "monthly (1 month)"
+    # Annual / yearly
+    if any(a in period_str for a in ("annual", "yearly", "year", "fy", "cy")):
+        return 12, "annual (12 months)"
+    # Default: assume annual if not specified
+    return 12, "assumed annual (no period specified)"
+
+
+def compute_score(total_co2e_kg, inputs, period_months=12, period_label="annual (12 months)"):
     """
     Compute a carbon intensity score based on total emissions
     relative to revenue or headcount.
+
+    Revenue intensity annualises emissions before comparing to annual_revenue,
+    so a quarterly analysis isn't understated vs. a full-year figure.
+    Headcount intensity uses the period emissions as-is (point-in-time metric).
     """
     scores = {}
+    annualisation_factor = 12.0 / period_months
 
     revenue = _to_number(inputs.get("annual_revenue"))
     if revenue is not None and revenue > 0:
-        intensity = total_co2e_kg / revenue
-        mt_per_million = (total_co2e_kg / 1000) / (revenue / 1_000_000)
+        annual_co2e_kg = total_co2e_kg * annualisation_factor
+        mt_per_million = (annual_co2e_kg / 1000) / (revenue / 1_000_000)
         if mt_per_million < 5:
             label = "excellent"
             reason = "< 5 tCO2e per $1M revenue - best-in-class"
@@ -426,9 +460,13 @@ def compute_score(total_co2e_kg, inputs):
             reason = "> 500 tCO2e per $1M revenue - very high intensity"
         scores["carbon_intensity_revenue"] = {
             "value": _safe_round(mt_per_million, 2),
-            "unit": "metric tons CO2e per $1M revenue",
+            "unit": "metric tons CO2e per $1M revenue (annualised)",
             "label": label,
             "reason": reason,
+            "methodology": (
+                f"Emissions annualised from {period_label} "
+                f"(x{_safe_round(annualisation_factor, 4)}) before dividing by annual revenue."
+            ),
         }
 
     headcount = _to_number(inputs.get("headcount"))
@@ -451,9 +489,10 @@ def compute_score(total_co2e_kg, inputs):
             reason = "> 50 tCO2e per employee - very high"
         scores["carbon_intensity_headcount"] = {
             "value": _safe_round(per_employee, 2),
-            "unit": "metric tons CO2e per employee",
+            "unit": f"metric tons CO2e per employee ({period_label})",
             "label": label,
             "reason": reason,
+            "methodology": f"Period emissions ({period_label}) divided by headcount. Not annualised.",
         }
 
     return scores
@@ -492,7 +531,8 @@ def compute_all(raw_inputs):
             "scope_3_pct": _safe_round(scope3_total / grand_total * 100, 1),
         }
 
-    scores = compute_score(grand_total, inputs)
+    period_months, period_label = _infer_period_months(inputs)
+    scores = compute_score(grand_total, inputs, period_months, period_label)
 
     # ── Source distribution (for pie chart — by bank transaction category) ──
     CATEGORY_DISPLAY = {

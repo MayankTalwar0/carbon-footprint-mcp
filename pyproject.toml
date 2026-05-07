@@ -1,12 +1,40 @@
 [project]
 name = "carbon-footprint-mcp"
 version = "1.0.0"
-description = "An MCP server for calculating carbon footprints using EPA GHG emission factors."
+description = "An MCP server for calculating carbon footprints from bank statements and activity data using EPA GHG emission factors."
 readme = "README.md"
 requires-python = ">=3.10"
+license = { file = "LICENSE" }
+authors = [
+    { name = "Mayank" },
+]
+keywords = [
+    "carbon",
+    "emissions",
+    "esg",
+    "ghg",
+    "mcp",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
 dependencies = [
     "mcp>=1.1.1",
 ]
+
+[project.urls]
+Homepage = "https://github.com/MayankTalwar0/carbon-footprint-mcp"
+Repository = "https://github.com/MayankTalwar0/carbon-footprint-mcp"
+Issues = "https://github.com/MayankTalwar0/carbon-footprint-mcp/issues"
+Changelog = "https://github.com/MayankTalwar0/carbon-footprint-mcp/blob/main/CHANGELOG.md"
 
 [project.scripts]
 carbon-footprint-mcp = "carbon_footprint_mcp:mcp.run"

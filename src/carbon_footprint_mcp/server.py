@@ -135,7 +135,8 @@ provided those values in this conversation. Do not fill them with guesses.**
 ```json
 {
   "source": "bank_csv_categorized",
-  "period": "<period from the CSV, e.g. Q1 2026>",
+  "period": "<period from the CSV, e.g. Q1 2026, or Annual 2025>",
+  "period_months": "<integer 1 to 12, e.g. 3 for Q1, 12 for Annual>",
   "egrid_subregion": "<from Step 2b>",
   "annual_revenue": null,
   "headcount": null,
@@ -162,32 +163,48 @@ Replace null with real values only when you have them. Leave null for everything
   average fuel prices (~$3.50/gallon). State the assumption clearly.
 - **Travel:** If you see airline charges, estimate passenger-miles from ticket cost and
   route if identifiable.
+- **Period:** It is critical to accurately set `period_months` based on the CSV data
+  (e.g., 3 for a quarter, 12 for a year) so that emissions can be annualized correctly
+  against annual revenue. If you can't tell, ask the user.
 - **Always state your assumptions** so the user can correct them.
 
-## Step 4: Generate ONE Report
+## Step 4: Generate the Report (MANDATORY — do not skip)
 
-Call `generateEmissionsReport` exactly ONCE with the output from `computeEmissions`.
+After calling `computeEmissions`, you MUST immediately call `generateEmissionsReport`.
+This is not optional. Do not present any results to the user before the report files are saved.
+
+**RULE: Never end your turn after `computeEmissions` without also calling `generateEmissionsReport`.**
 
 This saves BOTH:
-- `carbon_footprint_report.html` — styled report, open in any browser
+- `carbon_footprint_report.html` — styled visual report, open in any browser
 - `carbon_footprint_report.md` — plain-text fallback
 
 **Always pass an explicit `output_dir`** — either a path the user specified, or the user's
-Desktop. Do NOT rely on the default ".".
+Desktop. Do NOT use the default "." — when running under Claude Desktop the working
+directory is not somewhere the user can find.
+
+```json
+{
+  "emissions_json": "<full JSON string output from computeEmissions>",
+  "output_dir": "C:\\Users\\<username>\\Desktop"
+}
+```
+
+After saving, tell the user the exact absolute paths to both files.
 
 ## Step 5: Present Results
 
 1. Show an inline summary of total emissions by scope.
 2. If scores were computed (user provided revenue/headcount), highlight the carbon intensity
-   score and what it means. If not, note: "Carbon intensity scoring was skipped — provide
+   score and what it means. If not, note: "Carbon intensity scoring was skipped - provide
    headcount and annual revenue to unlock it."
-3. Tell the user both report files were saved and their paths.
+3. Tell the user both report files were saved and provide the full absolute paths.
 4. If any emissions used AI-categorized transactions, add this disclaimer:
    > **AI Categorization Notice:** Some emissions were derived from AI-categorized bank
-   > transactions. Only explicitly identified line items were used — no percentage-based
+   > transactions. Only explicitly identified line items were used - no percentage-based
    > estimates were applied. Please review categorizations for accuracy.
 5. List any categories that returned insufficient_data and what additional data would unlock them.
-6. Suggest 2–3 actionable reduction strategies based on their largest emission sources.
+6. Suggest 2-3 actionable reduction strategies based on their largest emission sources.
 
 Always rely on the `computeEmissions` tool rather than doing math yourself. Never invent
 values for missing data.'''
@@ -196,6 +213,10 @@ values for missing data.'''
 def computeEmissions(inputs_json: str) -> str:
     """
     Computes greenhouse gas emissions from structured activity data.
+
+    IMPORTANT: After calling this tool, you MUST call generateEmissionsReport with the
+    full output of this tool. Do not present results to the user without first saving
+    the report files. The _required_next_step field in the response will remind you.
 
     Args:
         inputs_json: A JSON string containing categorized activity data.
@@ -206,7 +227,7 @@ def computeEmissions(inputs_json: str) -> str:
                      Optional: annual_revenue, headcount (for scoring), period, source
     Returns:
         JSON string containing computed emissions by scope, totals, breakdown,
-        and carbon intensity scores.
+        carbon intensity scores, and a _required_next_step instruction.
     """
     try:
         inputs = json.loads(inputs_json)
@@ -215,6 +236,12 @@ def computeEmissions(inputs_json: str) -> str:
         return json.dumps({"error": f"Invalid JSON input: {e}"})
 
     result = compute_all(inputs)
+    result["_required_next_step"] = (
+        "MANDATORY: You must now call generateEmissionsReport with this full JSON output "
+        "and an explicit output_dir (user's Desktop or a path they specified). "
+        "Do not present results to the user until the report files are saved. "
+        "Pass the entire contents of this response as the emissions_json argument."
+    )
     return json.dumps(result, indent=2)
 
 @mcp.tool()
